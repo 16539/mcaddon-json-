@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON Editor</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            background-color: #f4f4f4;
+        }
+        #codeBox {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            height: 256px;
+            background-color: #333;
+            color: #fff;
+            padding: 10px;
+            box-sizing: border-box;
+            overflow: auto;
+            z-index: 1000;
+        }
+        #questionArea {
+            margin-top: 266px;
+            width: 100%;
+            max-width: 600px;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .question {
+            margin-bottom: 15px;
+            padding: 8px;
+            box-sizing: border-box;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .question.no-border {
+            border: none;
+            box-shadow: none;
+        }
+        .question label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .question input[type="text"],
+        .question input[type="number"],
+        .question select {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+        .question .options {
+            display: flex;
+            flex-wrap: wrap;
+        }
+        .question .options label {
+            margin-right: 10px;
+        }
+        .question .options input {
+            margin-right: 5px;
+        }
+    #generateBtn {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 1000;
+        background-color: #4CAF50;
+        color: white;
+        padding: 10px 15px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+    }
+    #generateBtn:hover {
+        background-color: #45a049;
+    }
+        /* 单选和多选按钮颜色 */
+        .question input[type="radio"],
+        .question input[type="checkbox"] {
+        accent-color: #4CAF50;
+        }
+    </style>
+</head>
+<body>
+    <div id="codeBox">
+        <pre id="jsonOutput">{}</pre>
+    </div>
+    <div id="questionArea">
+        <!-- Questions will be dynamically generated here -->
+    </div>
+    <button id="generateBtn">生成 JSON</button>
+
+    <script>
+        const questions = [
+            {
+                key: "name",
+                type: "String",
+                title: "Name",
+                remark: "请输入您的姓名",
+                answerType: "text",
+                defaultValue: "John Doe",
+                border: true
+            },
+            {
+                key: "gender",
+                type: "String",
+                title: "Gender",
+                remark: "请选择您的性别",
+                answerType: "select",
+                options: ["Male", "Female", "Other"],
+                displayOptions: ["男", "女", "其他"],
+                defaultValue: "Male",
+                border: true
+            },
+            {
+                key: "age",
+                type: "Number",
+                title: "Age",
+                remark: "请输入您的年龄",
+                defaultValue: 25,
+                border: false
+            },
+            {
+                key: "isStudent",
+                type: "Boolean",
+                title: "Are you a student?",
+                remark: "请选择您的身份",
+                options: ["是", "否", "默认"],
+                border: true
+            },
+            {
+                key: "hobbies",
+                type: "Array",
+                title: "Hobbies",
+                remark: "请选择您的爱好",
+                options: [],
+                displayOptions: [],
+                border: false,
+                items: [
+                    {
+                        type: "Object",
+                        properties: [
+                            {
+                                key: "name",
+                                type: "String",
+                                title: "Hobby Name",
+                                remark: "请输入爱好名称",
+                                answerType: "text",
+                                border: true
+                            },
+                            {
+                                key: "duration",
+                                type: "Number",
+                                title: "Duration (years)",
+                                remark: "请输入持续时间（年）",
+                                defaultValue: 1,
+                                border: true
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                key: "address",
+                type: "Object",
+                title: "Address",
+                remark: "请输入您的地址",
+                border: true,
+                properties: [
+                    {
+                        key: "street",
+                        type: "String",
+                        title: "Street",
+                        remark: "请输入街道名称",
+                        answerType: "text",
+                        border: true
+                    },
+                    {
+                        key: "city",
+                        type: "String",
+                        title: "City",
+                        remark: "请输入城市名称",
+                        answerType: "text",
+                        border: true
+                    },
+                    {
+                        key: "zipcode",
+                        type: "Number",
+                        title: "Zip Code",
+                        remark: "请输入邮政编码",
+                        defaultValue: 100000,
+                        border: false
+                    }
+                ]
+            }
+        ];
+
+
+        function renderQuestions(questions, parentElement, parentKey = '') {
+            questions.forEach((question, index) => {
+                const uniqueId = `${parentKey}${question.key}_${index}`;
+                const questionDiv = document.createElement('div');
+                questionDiv.className = `question ${question.border ? '' : 'no-border'}`;
+                questionDiv.innerHTML = `
+                    <label>${question.title}</label>
+                    <small>${question.remark}</small>
+                `;
+                if (question.type === 'String' && question.answerType === 'text') {
+                    questionDiv.innerHTML += `<input type="text" id="${uniqueId}" value="${question.defaultValue || ''}" />`;
+                } else if (question.type === 'String' && question.answerType === 'select') {
+                    questionDiv.innerHTML += `
+                        <select id="${uniqueId}">
+                            ${question.displayOptions.map((option, index) => `<option value="${question.options[index]}" ${question.defaultValue === question.options[index] ? 'selected' : ''}>${option}</option>`).join('')}
+                        </select>
+                    `;
+                } else if (question.type === 'Number') {
+                    questionDiv.innerHTML += `<input type="number" id="${uniqueId}" value="${question.defaultValue || ''}" />`;
+                } else if (question.type === 'Boolean') {
+                    questionDiv.innerHTML += `
+                        <div class="options">
+                            ${question.options.map(option => `
+                                <label><input type="radio" name="${uniqueId}" value="${option}" ${option === '默认' ? 'checked' : ''} /> ${option}</label>
+                            `).join('')}
+                        </div>
+                    `;
+                } else if (question.type === 'Array') {
+                    questionDiv.innerHTML += `
+                        <div class="options">
+                            ${question.displayOptions.map((option, index) => `
+                                <label><input type="checkbox" name="${uniqueId}" value="${question.options[index]}" /> ${option}</label>
+                            `).join('')}
+                        </div>
+                    `;
+                    if (question.items) {
+                        question.items.forEach((item, itemIndex) => {
+                            const nestedDiv = document.createElement('div');
+                            nestedDiv.className = 'nested';
+                            renderQuestions(item.properties, nestedDiv, `${uniqueId}_item${itemIndex}_`);
+                            questionDiv.appendChild(nestedDiv);
+                        });
+                    }
+                } else if (question.type === 'Object') {
+                    const nestedDiv = document.createElement('div');
+                    nestedDiv.className = 'nested';
+                    renderQuestions(question.properties, nestedDiv, `${uniqueId}_`);
+                    questionDiv.appendChild(nestedDiv);
+                }
+                parentElement.appendChild(questionDiv);
+            });
+        }
+
+        function generateJSON(questions, parentKey = '') {
+            const jsonOutput = {};
+            questions.forEach((question, index) => {
+                const uniqueId = `${parentKey}${question.key}_${index}`;
+                if (question.type === 'String') {
+                    const value = document.getElementById(uniqueId).value;
+                    if (value) jsonOutput[question.key] = value;
+                } else if (question.type === 'Number') {
+                    const value = document.getElementById(uniqueId).value;
+                    if (value) jsonOutput[question.key] = Number(value);
+                } else if (question.type === 'Boolean') {
+                    const options = document.getElementsByName(uniqueId);
+                    options.forEach(option => {
+                        if (option.checked && option.value !== '默认') {
+                            jsonOutput[question.key] = option.value === '是';
+                        }
+                    });
+                } else if (question.type === 'Array') {
+                    const options = document.getElementsByName(uniqueId);
+                    const values = [];
+                    options.forEach(option => {
+                        if (option.checked) values.push(option.value);
+                    });
+                    if (values.length > 0) jsonOutput[question.key] = values;
+                    if (question.items) {
+                        const nestedArray = [];
+question.items.forEach((item, itemIndex) => {
+                            const nestedArrayItem = generateJSON(item.properties, `${uniqueId}_item${itemIndex}_`);
+                            if (Object.keys(nestedArrayItem).length > 0) {
+                                nestedArray.push(nestedArrayItem);
+                            }
+                        });
+                        if (nestedArray.length > 0) {
+                            jsonOutput[question.key] = nestedArray;
+                        }
+                    }
+                } else if (question.type === 'Object') {
+                    const nestedJson = generateJSON(question.properties, `${uniqueId}_`);
+                    if (Object.keys(nestedJson).length > 0) {
+                        jsonOutput[question.key] = nestedJson;
+                    }
+                }
+            });
+            return jsonOutput;
+        }
+
+        document.getElementById('generateBtn').addEventListener('click', () => {
+            const json = generateJSON(questions);
+            document.getElementById('jsonOutput').textContent = JSON.stringify(json, null, 2);
+        });
+
+        renderQuestions(questions, document.getElementById('questionArea'));
+    </script>
+</body>
+</html>
