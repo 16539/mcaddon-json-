@@ -195,14 +195,715 @@
                     {
                         key: "zipcode",
                         type: "Number",
-                        title: "Zip Code",
-                        remark: "请输入邮政编码",
-                        defaultValue: 100000,
-                        border: false
+const questions = [
+    {
+        key: "format_version",
+        type: "String",
+        title: "版本：",
+        remark: "该项目支持的最低游戏版本",
+        answerType: "text",
+        defaultValue: "1.20.20",
+        border: true
+    },
+    {
+        key: "minecraft:item",
+        type: "Object",
+        title: "",
+        remark: "",
+        border: true,
+        properties: [
+            {
+                key: "description",
+                type: "Object",
+                title: "文档描述",
+                remark: "description是代表某项的字符列表。描述必须���含标识符；其他字段是可选的。",
+                border: true,
+                properties: [
+                    {
+                        key: "identifier",
+                        type: "String",
+                        title: "命名空间:ID",
+                        remark: "下面只是格式示范；此项目的标识符；必须包含命名空间���除非覆盖原版项目，否则不得使用“Minecraft”命名空间。",
+                        answerType: "text",
+                        defaultValue: "minecraft:blaze_rod",
+                        border: true
+                    },
+                    {
+                        key: "menu_category",
+                        type: "Object",
+                        title: "背包类���",
+                        remark: "该menu_category参数详细说明了项目的创意组名称和类别，并且具有三个自己的参数：",
+                        border: false,
+                        properties: [
+                            {
+                                key: "group",
+                                type: "String",
+                                title: "创意组",
+                                remark: "此项目所属的创意组。组名限制为 256 个字符。",
+                                answerType: "text",
+                                border: true
+                            },
+                            {
+                                key: "category",
+                                type: "String",
+                                title: "类别",
+                                remark: "此项目所属的创意类别。选项包括'建筑'、'自然'、'设备'、'物品'和'无'",
+                                answerType: "select",
+                                options: ["","construction", "nature", "equipment", "items", "none"],
+                                displayOptions: ["","建筑", "自然", "设备", "物品", "无"],
+                                border: true
+                            },
+                            {
+                                key: "is_hidden_in_commands",
+                                type: "Boolean",
+                                title: "在命令中是否隐藏",
+                                remark: "确定此物品是否可以与命令一起使用。默认情况下，命令可以使用物品。",
+                                options: ["是", "否", "默认"],
+                                border: true
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                key: "components",
+                type: "Object",
+                title: "组件：开始设置该物品的各种参数吧！",
+                remark: "",
+                border: false,
+                properties: [
+                    {
+                        key: "minecraft:allow_off_hand",
+                        type: "Boolean",
+                        title: "副手",
+                        remark: "该物品是否可放到副手？",
+                        options: ["是", "否", "默认"],
+                        border: true
+                    },
+                    {
+                        key: "minecraft:block_placer",
+                        type: "Object",
+                        title: "放置方块：",
+                        remark: "将物品设置为放置方块的物品组件。带有此组件的物品在使用时会放置一个方块。",
+                        border: true,
+                        properties: [
+                            {
+                                key: "block",
+                                type: "String",
+                                title: "|",
+                                remark: "|输入该物品可以放置出来的方块",
+                                answerType: "text",
+                                defaultValue: "",
+                                border: true
+                            },
+                            {
+                                key: "use_on",
+                                type: "Array",
+                                title: "|",
+                                remark: "|包含此物品可用在的块的块描述符列表。如果留空，则允许所有块。",
+                                options: ["", "dirt", "grass", ""],
+                                displayOptions: ["不填", "dirt", "grass", "该项请最后��行添加"],
+                                border: true,
+                                items:[]
+                            }
+                        ]
+                    },
+                    {
+                        key: "minecraft:can_destroy_in_creative",
+                        type: "Boolean",
+                        title: "创造可破坏性",
+                        remark: "确定物品在创造模式下挥动时是否会破坏方块",
+                        options: ["是", "否", "默认"],
+                        border: true
+                    },
+                    {
+                        key: "minecraft:cooldown",
+                        type: "Object",
+                        title: "冷却：",
+                        remark: "设置物品的“冷却”时间。使用物品后，该物品将在该组件的“持续时间”设置指定的时间内无法使用。",
+                        border: true,
+                        properties: [
+                            {
+                                key: "category",
+                                type: "String",
+                                title: "|",
+                                remark: "|此物品的冷却类型(文档里也没告诉我有哪些，我也没搞懂，后续搞懂了会更新)",
+                                answerType: "text",
+                                defaultValue: "",
+                                border: true
+                            },
+                            {
+                                key: "duration",
+                                type: "Number",
+                                title: "|",
+                                remark: "|具有匹配类别的物品在再次可用之前需要冷却的时间长度（以秒为单位）",
+                                defaultValue: "",
+                                border: true
+                            }
+                        ]
+                    },
+                    {
+                        key: "minecraft:damage",
+                        type: "Number",
+                        title: "伤害",
+                        remark: "决定物品在攻击时造成多少额外伤害。请���意，这必须是整数正值",
+                        defaultValue: "",
+                        border: true
+                    },
+                    {
+                        key: "minecraft:display_name",
+                        type: "String",
+                        title: "显示的名称",
+                        remark: "设置 Minecraft：Bedrock Edition 中的物品显示名称。此组件还可用于通过引用本地化文件中的键来从本地化文件中提取内容",
+                        answerType: "text",
+                        defaultValue: "",
+                        border: true
+                    },
+                    {
+                        key: "minecraft:durability",
+                        type: "Object",
+                        title: "耐久：",
+                        remark: "设定物品在破坏前可以承受的伤害量，并允许物品在铁砧、磨石或工作台上进行组合",
+                        border: true,
+                        properties: [
+                            {
+                                key: "damage_chance",
+                                type: "Object",
+                                title: "|损伤几率：",
+                                remark: "|此物品失去耐久度的百分比几率。默认值为 100。定义为具有最小值和最大值的整数范围",
+                                border: true,
+                                properties: [
+                                    {
+                                        key: "min",
+                                        type: "Number",
+                                        title: "||最小值",
+                                        remark: "||请注意，这必须是整数正值",
+                                        defaultValue: "",
+                                        border: false
+                                    },
+                                    {
+                                        key: "max",
+                                        type: "Number",
+                                        title: "||最大值",
+                                        remark: "||请注意，这必须是整数正值",
+                                        defaultValue: "",
+                                        border: false
+                                    }
+                                ]
+                            },
+                            {
+                                key: "max_durability",
+                                type: "Number",
+                                title: "|最大耐久",
+                                remark: "|是指此物品在损坏前可以承受的伤害量。这是必需参数，最小值为 0",
+                                defaultValue: "",
+                                border: false
+                            }
+                        ]
+                    },
+                    {
+                        key: "minecraft:enchantable",
+                        type: "Object",
+                        title: "可使用附魔：",
+                        remark: "决定了哪些魔咒可以应用到物品上。并非所有魔咒都会对所有物品组件产生影响",
+                        border: true,
+                        properties: [
+                            {
+                                key: "slot",
+                                type: "String",
+                                title: "|",
+                                remark: "|可以应用哪些附魔(文档里也没告诉我有哪些，我也没搞懂，后续搞懂了会更新)",
+                                answerType: "text",
+                                defaultValue: "",
+                                border: false
+                            },
+                            {
+                                key: "value",
+                                type: "Number",
+                                title: "|",
+                                remark: "|附魔的值（最小值为 0）",
+                                defaultValue: "",
+                                border: false
+                            }
+                        ]
+                    },
+                    {
+                        key: "minecraft:entity_placer",
+                        type: "Object",
+                        title: "生成实体：",
+                        remark: "���许物品生成实体。此外，在 1.19.80 及更高版本中，该组件允许物品设置怪物生成器的生成类型",
+                        border: true,
+                        properties: [
+                            {
+                                key: "entity",
+                                type: "String",
+                                title: "|",
+                                remark: "|设置要放置在世界上的实体。示例：minecraft:spider",
+                                answerType: "text",
+                                defaultValue: "",
+                                border: false
+                            },
+                            {
+                                key: "dispense_on",
+                                type: "Array",
+                                title: "|",
+                                remark: "|（看不懂是干嘛）的包含可分配此物品的方块的方块描述符列表。如果留空，则允许分配所有方块",
+                                options: ["", "在这里设置可分配此物品的方块列表"],
+                                displayOptions: ["不填", "留个记号，后面自己加更多内容"],
+                                border: false,
+                                items:[]
+                            },
+                            {
+                                key: "use_on",
+                                type: "Array",
+                                title: "|",
+                                remark: "|包含此物品可用在的块的块描述符列表。如果留空，则允许所有块",
+                                options: ["", "在这里设置可使用此物品的方块列表"],
+                                displayOptions: ["不填", "留个记号，后面自己加更多内容"],
+                                border: false,
+                                items:[]
+                            }
+                        ]
+                    },
+                    {
+                        key: "minecraft:food",
+                        type: "Object",
+                        title: "食物",
+                        remark: "！！！必须同时拥有minecraft:use_modifiers组件才能正常运行",
+                        border: true,
+                        properties: [
+                            {
+                                key: "can_always_eat",
+                                type: "Boolean",
+                                title: "总是可食用",
+                                remark: "你总是��以吃这个食物（即使不饿的时候）",
+                                options: ["是", "否", "默认"],
+                                border: true
+                            },
+                            {
+                                key: "nutrition",
+                                type: "Number",
+                                title: "饱食度",
+                                remark: "食用后增加的饱食度（必须为整数）",
+                                defaultValue: "",
+                                border: true
+                            },
+                            {
+                                key: "saturation_modifier",
+                                type: "Number",
+                                title: "饱和度调节剂",
+                                remark: "应用后，饱和度调整值公式为：饱食度*饱和度调整值*2（浮点型）",
+                                defaultValue: "",
+                                border: true
+                            },
+                            {
+                                key: "entity",
+                                type: "String",
+                                title: "转化",
+                                remark: "物品在被使用后会转变为：",
+                                answerType: "text",
+                                defaultValue: "",
+                                border: true
+                            }
+                        ]
+                    },
+                    {
+                        key: "minecraft:fuel",
+                        type: "Object",
+                        title: "燃料：",
+                        remark: "允许将该物品用作熔炉中的燃料来“烹饪”其他物品",
+                        border: true,
+                        properties: [
+                            {
+                                key: "duration",
+                                type: "Number",
+                                title: "",
+                                remark: "该燃料烹饪食物需要多长时间（以秒为单位）。最小值：0.05（浮点型）",
+                                defaultValue: "",
+                                border: false
+                            }
+                        ]
+                    },
+                    {
+                        key: "minecraft:glint",
+                        type: "Boolean",
+                        title: "附魔炫光特效",
+                        remark: "确定物品是否具有附魔��光渲染效果",
+                        options: ["是", "否", "默认"],
+                        border: true
+                    },
+                    {
+                        key: "minecraft:hand_equipped",
+                        type: "Boolean",
+                        title: "呈现为工具",
+                        remark: "确定该物品是否像手中的��具一样呈现",
+                        options: ["是", "否", "默认"],
+                        border: true
+                    },
+                    {
+                        key: "minecraft:hover_text_color",
+                        type: "String",
+                        title: "文本色彩",
+                        remark: "鼠标悬停在项目名称上时的��色",
+                        answerType: "text",
+                        defaultValue: "",
+                        border: true
+                    },
+                    {
+                        key: "minecraft:icon",
+                        type: "Object",
+                        title: "材质：",
+                        remark: "设置图标项目组件。确定在 UI 和其他地方表示项目的图标",
+                        border: true,
+                        properties: [
+                            {
+                                key: "textures",
+                                type: "String",
+                                title: "",
+                                remark: "该地址包含可用于物品图标的不同纹理。纹理和调色板纹理也可以在这里指定，图标纹理是与纹理文件关联的 resource_pack里的textures里的item_texture.json“texture_data”对象的键（其实我也没完全看懂，搞懂了会再更新一下）",
+                                answerType: "text",
+                                defaultValue: "",
+                                border: false
+                            }
+                        ]
+                    },
+                    {
+                        key: "minecraft:interact_button",
+                        type: "String",
+                        title: "交互按钮文本",
+                        remark: "不填则不会启用任何按钮功能，输入的字符串将作为交互按钮���文本",
+                        answerType: "text",
+                        defaultValue: "",
+                        border: true
+                    },
+                    {
+                        key: "minecraft:liquid_clipped",
+                        type: "Boolean",
+                        title: "与液体交互",
+                        remark: "确定物品是否可以与���体方块，就像水桶那样(交互的效果又不给我设置，奇怪的组件)",
+                        options: ["是", "否", "默认"],
+                        border: true
+                    },
+                    {
+                        key: "minecraft:max_stack_size",
+                        type: "Number",
+                        title: "最大堆叠数",
+                        remark: "最多可以堆叠多少个物品在一起(整数）",
+                        defaultValue: "",
+                        border: true
+                    },
+                    {
+                        key: "minecraft:projectile",
+                        type: "Object",
+                        title: "弹药",
+                        remark: "让物品可以像箭一样被弓和发射器射出去，同时还可以被拥有minecraft:shooter标签的物品发射，同时似乎还可以兼容minecraft:throwable",
+                        border: true,
+                        properties: [
+                            {
+                                key: "minimum_critical_power",
+                                type: "Number",
+                                title: "蓄力时间",
+                                remark: "该物品被发射需要的蓄力时间（浮点型）",
+                                defaultValue: "",
+                                border: true
+                            },
+                            {
+                                key: "projectile_entity",
+                                type: "String",
+                                title: "实体",
+                                remark: "使用这个物品后产生的子弹实体，格式是命名空间:名字，不写命名空间则默认minecraft",
+                                answerType: "text",
+                                defaultValue: "",
+                                border: true
+                            }
+                        ]
+                    },
+                    {
+                        key: "minecraft:record",
+                        type: "Object",
+                        title: "唱片",
+                        remark: "该物品将作为一张唱片，可以被唱片机播放某段声音",
+                        border: true,
+                        properties: [
+                            {
+                                key: "comparator_signal",
+                                type: "Number",
+                                title: "比较器检测",
+                                remark: "对唱片机使用该物品后，比较器检测唱片机得到的红石强度（整数）",
+                                defaultValue: "",
+                                border: true
+                            },
+                            {
+                                key: "duration",
+                                type: "Number",
+                                title: "持续时间",
+                                remark: "声音事件的持续时间（以秒为单位），不填应该是播完。（浮点型）",
+                                defaultValue: "",
+                                border: true
+                            },
+                            {
+                                key: "sound_event",
+                                type: "String",
+                                title: "声音事件",
+                                remark: "Sound event types: 13, cat, blocks, chirp, far, mall, mellohi, stal, strad, ward, 11, wait, pigstep, otherside, 5, relic. The value may be one listed below.",
+                                answerType: "text",
+                                defaultValue: "",
+                                border: true
+                            }
+                        ]
+                    },
+                    {
+                        key: "minecraft:repairable",
+                        type: "Object",
+                        title: "修复耐久",
+                        remark: "定义用来修复该物品的物品/该组件功能有遗漏",
+                        border: true,
+                        properties: [
+                            {
+                                key: "repair_items",
+                                type: "Array",
+                                title: "",
+                                remark: "",
+                                options: ["","anvil","在这里设置可使用此物品的方块列表"],
+                                displayOptions: ["不填","示例", "留个记号，后面自己加更多内容"],
+                                border: false,
+                                items:[]
+                            }
+                        ]
+                    },
+                    {
+                        key: "minecraft:shooter",
+                        type: "Object",
+                        title: "发射器",
+                        remark: "该物品能够像弓一样发射弹药。必须有该minecraft:use_modifiers组件才能正常运行。",
+                        border: true,
+                        properties: [
+                            {
+                                key: "ammunition",
+                                type: "Array",
+                                title: "弹药",
+                                remark: "设置用作弹药的实体",
+                                options: [],
+                                displayOptions: [],
+                                border: false,
+                                items:[
+                                    {
+                                        type:"Object",
+                                        properties:[
+                                            {
+                                                key: "item",
+                                                type: "String",
+                                                title: "表示项目描述标识符",
+                                                remark: "参考文档给的示例是custom_projectile",
+                                                answerType: "text",
+                                                defaultValue: "",
+                                                border: true
+                                            },
+                                            {
+                                                key: "use_offhand",
+                                                 type: "Boolean",
+                                                title: "从副手使用",
+                                                remark: "当设置为“true”时，弹药可以从副手使用",
+                                                options: ["是", "否", "默��"],
+                                                border: true
+                                            },
+                                            {
+                                                key: "search_inventory",
+                                                 type: "Boolean",
+                                                title: "从背包��用",
+                                                remark: "当设置为“true”时，弹药可以从背包使用",
+                                                options: ["是", "否", "默认"],
+                                                border: true
+                                            },
+                                            {
+                                                key: "use_in_creative",
+                                                 type: "Boolean",
+                                                title: "创造中使用",
+                                                remark: "当设置为“true”时，弹药可以在创造模式下直接使用",
+                                                options: ["是", "否", "默认"],
+                                                border: true
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                key: "charge_on_draw",
+                                type: "Boolean",
+                                title: "充电",
+                                remark: "设置项目在绘制时是否收费(?机翻没看懂",
+                                options: ["是", "否", "默认"],
+                                border: true
+                            },
+                            {
+                                key: "max_draw_duration",
+                                type: "Number",
+                                title: "最大绘图持续时间",
+                                remark: "确定武器在自动释放之前可以拔出多长时间，应该是蓄力时间吧（浮点型）",
+                                defaultValue: "",
+                                border: true
+                            },
+                            {
+                                key: "scale_power_by_draw_duration",
+                                type: "Boolean",
+                                title: "蓄力比率",
+                                remark: "当设���为“true”时，武器蓄力的时间越长，释放时的力量就越大",
+                                options: ["是", "否", "默认"],
+                                border: true
+                            }
+                        ]
+                    },
+                    {
+                        key: "minecraft:should_despawn",
+                        type: "Boolean",
+                        title: "掉落后计时消失",
+                        remark: "该物品掉落在世界上是到时间会消失",
+                        options: ["是", "否", "默认"],
+                        border: true
+                    },
+                    {
+                        key: "minecraft:stacked_by_data",
+                        type: "Boolean",
+                        title: "掉落物合并",
+                        remark: "设置具有不同辅助值的同一物品是否可以在漂浮于世界中时堆叠和合并",
+                        options: ["是", "否", "默认"],
+                        border: true
+                    },
+                    {
+                        key: "minecraft:tags",
+                        type: "Array",
+                        title: "标签",
+                        remark: "一个可包含多个项目标签的数组。详细标签组设置后续更新",
+                        options: ["","在这里设置可使用此物品的方块列表"],
+                        displayOptions: ["不填","���个记号，后面自己加更多内容"],
+                        border: true,
+                        items:[]
+                    },
+                    {
+                        key: "minecraft:throwable",
+                        type: "Object",
+                        title: "投掷物",
+                        remark: "设置可抛出物品组件（没弄懂��就不翻译了）",
+                        border: true,
+                        properties: [
+                            {
+                                key: "do_swing_animation",
+                                type: "Boolean",
+                                title: "do_swing_animation",
+                                remark: "Whether the item should use the swing animation when thrown.",
+                                options: ["是", "否", "默认"],
+                                border: true
+                            },
+                            {
+                                key: "launch_power_scale",
+                                type: "Number",
+                                title: "launch_power_scale",
+                                remark: "The scale at which the power of the throw increases（浮点型）",
+                                defaultValue: "",
+                                border: true
+                            },
+                            {
+                                key: "max_draw_duration",
+                                type: "Number",
+                                title: "max_draw_duration",
+                                remark: "The maximum duration to draw a throwable item.（浮点型）",
+                                defaultValue: "",
+                                border: true
+                            },
+                            {
+                                key: "max_launch_power",
+                                type: "Number",
+                                title: "max_launch_power",
+                                remark: "The maximum power to launch the throwable item.（浮点型）",
+                                defaultValue: "",
+                                border: true
+                            },
+                            {
+                                key: "min_draw_duration",
+                                type: "Number",
+                                title: "min_draw_duration",
+                                remark: "The minimum duration to draw a throwable item.（浮点型）",
+                                defaultValue: "",
+                                border: true
+                            },
+                            {
+                                key: "scale_power_by_draw_duration",
+                                type: "Boolean",
+                                title: "scale_power_by_draw_duration",
+                                remark: "Whether or not the power of the throw increases with duration charged. When true, The longer you hold, the more power it will have when released.",
+                                options: ["是", "否", "默认"],
+                                border: true
+                            }
+                        ]
+                    },
+                    {
+                        key: "minecraft:use_animation",
+                        type: "String",
+                        title: "动画",
+                        remark: "决定使用物品时播放哪种动画（后续会更新一键设置",
+                        answerType: "text",
+                        defaultValue: "",
+                        border: true
+                    },
+                    {
+                        key: "minecraft:use_modifiers",
+                        type: "Object",
+                        title: "食物、发射器（弓）必备前置设置",
+                        remark: "",
+                        border: true,
+                        properties: [
+                            {
+                                key: "movement_modifier",
+                                type: "Number",
+                                title: "移动速度倍率",
+                                remark: "当物品使用时，修改器值可以调整玩家的移动速度（浮点型）",
+                                defaultValue: "",
+                                border: true
+                            },
+                            {
+                                key: "use_duration",
+                                type: "Number",
+                                title: "消耗时间",
+                                remark: "该物品需要多长时间（以秒为单位）才能使用（浮点型）",
+                                defaultValue: "",
+                                border: true
+                            }
+
+                        ]
+                    },
+                    {
+                        key: "minecraft:wearable",
+                        type: "Object",
+                        title: "可穿戴",
+                        remark: "设置可穿戴物件",
+                        border: true,
+                        properties: [
+                            {
+                                key: "protection",
+                                type: "Number",
+                                title: "护甲值",
+                                remark: "穿戴后带来的防护等级（整数）",
+                                defaultValue: "",
+                                border: true
+                            },
+                            {
+                                key: "slot",
+                                type: "String",
+                                title: "穿戴部位",
+                                remark: "选择该装备可以放置的装备槽(后续弄明白后一定重新更正翻译",
+                                answerType: "select",
+                                options: ["","slot.weapon.mainhand","slot.weapon.offhand","slot.armor.head","slot.armor.chest","slot.armor.legs","slot.armor.feet","slot.hotbar","slot.inventory","slot.enderchest","slot.saddle","slot.armor","slot.chest","slot.equippable"],
+                                displayOptions: ["空白", "武器槽.主手", "武器槽.副手","插槽.装甲.头部","插槽.装甲.胸部","插槽.装甲.腿部","插���.装甲.脚","插槽.快捷栏","插槽.背包","末影箱","插槽.马鞍","插槽.装甲","slot.equippable"],
+                                defaultValue: "Male",
+                                border: true
+                            }
+                        ]
                     }
                 ]
             }
-        ];
+        ]
+    }
+];
 
 
         function renderQuestions(questions, parentElement, parentKey = '') {
